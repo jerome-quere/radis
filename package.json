@@ -1,0 +1,29 @@
+{
+  "name": "radis",
+  "version": "0.0.1",
+  "description": "A Node.js dependency injection base on Angular.js API.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jerome-quere/radis.git"
+  },
+  "keywords": [
+    "radis",
+    "dependency-injection"
+  ],
+  "author": "Jérôme Quéré <contact@jeromequere.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jerome-quere/radis/issues"
+  },
+  "homepage": "https://github.com/jerome-quere/radis#readme",
+  "dependencies": {
+    "lodash": "4"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0"
+  }
+}
