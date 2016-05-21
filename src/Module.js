@@ -44,6 +44,7 @@ class Module {
             instance: null,
             service: null
         });
+        return this;
     }
 
     factory(name, injectArray) {
@@ -63,6 +64,7 @@ class Module {
             instance: null,
             service: null
         });
+        return this;
     }
 
     bootstrap() {
@@ -72,6 +74,7 @@ class Module {
         this._bootstraped = true;
         this._runConfigHooks();
         this._runRunHooks();
+        return this;
     }
 
     getInjector() {
