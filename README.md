@@ -8,7 +8,7 @@ A Node.js dependency injection base on Angular.js API.
 
 ```js
 
-var radis = require('radis)();
+var radis = require('radis')();
 var app   = radis.module('app', []);
 
 class UnicornService {
