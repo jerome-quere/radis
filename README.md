@@ -1,8 +1,11 @@
-# radis
-
-[![npm](https://img.shields.io/npm/v/radis.svg?maxAge=2592000)](https://www.npmjs.com/package/radis) [![Travis](https://img.shields.io/travis/jerome-quere/radis.svg?maxAge=2592000)](https://travis-ci.org/jerome-quere/radis)
+<h1>
+  <a href="https://github.com/jerome-quere/radis"><img alt="Radis logo" src="http://jerome-quere.github.io/radis/images/logo.png" title="Radis"/></a>
+</h1>
 
 A Node.js dependency injection base on Angular.js API.
+
+[![Travis](https://travis-ci.org/jerome-quere/radis.svg)](https://travis-ci.org/jerome-quere/radis)
+[![NPM](https://nodei.co/npm/radis.png)](https://npmjs.org/package/radis)
 
 ## Quickstart
 
