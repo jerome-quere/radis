@@ -1,10 +1,11 @@
 <h1>
-  <a href="https://github.com/jerome-quere/radis"><img alt="Radis logo" src="http://jerome-quere.github.io/radis/images/logo.png" title="Radis"/></a>
+  <a href="https://github.com/jerome-quere/radis"><img alt="Radis logo" src="http://jerome-quere.github.io/radis/images/logo.png"/></a>
 </h1>
 
 A Node.js dependency injection base on Angular.js API.
 
 [![Travis](https://travis-ci.org/jerome-quere/radis.svg)](https://travis-ci.org/jerome-quere/radis)
+
 [![NPM](https://nodei.co/npm/radis.png)](https://npmjs.org/package/radis)
 
 ## Quickstart
@@ -30,3 +31,6 @@ app.run(function (unicorn) {
 
 ## Requirement
 Radis use ES6 syntax internally so it require node >= 5.
+
+## Documentation
+[Go to documentation](http://jerome-quere.github.io/radis/)
