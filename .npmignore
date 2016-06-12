@@ -1,4 +1,4 @@
 node_modules
 test
-.jshintrc
+.eslintrc
 .travis.yml
