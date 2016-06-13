@@ -31,11 +31,11 @@ class Injector {
      * @return {*} The return value of injectArray
      */
     invoke(injectArray, self, locales) {
-        if (self === undefined) {
+        if (self === undefined || self === null) {
             self = this;
         }
 
-        if (locales === undefined) {
+        if (locales === undefined || locales === null) {
             locales = {};
         }
 
@@ -59,7 +59,7 @@ class Injector {
      */
     instantiate(Constructor, locales) {
 
-        if (locales === undefined) {
+        if (locales === undefined || locales === null) {
             locales = {};
         }
 
