@@ -127,7 +127,7 @@
     // specify the maximum cyclomatic complexity allowed in a program (off by default)
     "consistent-return": 1,
     // require return statements to either always or never specify values
-    "curly": 1,
+    "curly": 0,
     // specify curly brace conventions for all control statements
     "default-case": 0,
     // require default case in switch statements (off by default)
@@ -135,7 +135,7 @@
     // encourages use of dot notation whenever possible
     "eqeqeq": 1,
     // require the use of === and !==
-    "guard-for-in": 1,
+    "guard-for-in": 0,
     // make sure for-in loops have an if statement (off by default)
     "no-alert": 0,
     // disallow the use of alert, confirm, and prompt

@@ -1,48 +1,54 @@
 "use strict";
 
-let chai = require('chai'),
+let chai = require("chai"),
     expect = chai.expect,
-    radis = require('../index.js'),
-    Module = require('../src/Module.js'),
-    Injector = require('../src/Injector.js');
+    radis = require("../index.js"),
+    Module = require("../src/Module.js"),
+    Injector = require("../src/Injector.js");
 
 chai.should();
 
-describe('Core', function () {
-    describe('#module()', function () {
+describe("Core", function () {
+    describe("#module()", function () {
 
-        it('should return the module', function () {
-            let module = radis.module('module', []);
+        it("should return the module", function () {
+            let module = radis.module("module", []);
             module.should.be.an.instanceof(Module);
             module.getName().should.be.equal("module");
-        });
-
-        it('should throw', function () {
-            expect(() => radis.module('inexistant')).to.throw();
         });
     });
 });
 
-describe('Module', function () {
-    describe('#bootstrap()', function () {
+describe("Module", function () {
+    describe("#bootstrap()", function () {
         this.timeout(1000);
-        it('should be called', function () {
-            let module = radis.module('module', []);
+        it("should be called", function () {
+            let module = radis.module("module", []);
             module.bootstrap();
-        });
-
-        it('should be called once', function () {
-            let module = radis.module('module', []);
-            module.bootstrap();
-            expect(() => module.bootstrap()).to.throw();
         });
     });
 
 
-    describe('#service()', function () {
+    describe("#service()", function () {
         this.timeout(1000);
-        it('should be injected', function () {
-            let module = radis.module('module', []);
+        it("should be injected", function () {
+            let module = radis.module("module", [])
+                .factory("s1", () => "s1")
+                .factory("s2", () => "s2")
+                .factory("s3", () => "s3")
+                .run(function (s1, s2, s3) {
+                    s1.should.be.equal("s1");
+                    s2.should.be.equal("s2");
+                    s3.should.be.equal("s3");
+                });
+            module.bootstrap();
+        });
+    });
+
+    describe("#factory()", function () {
+        this.timeout(1000);
+        it("should be injected", function () {
+            let module = radis.module("module", []);
 
             class Service1 {
             }
@@ -51,9 +57,9 @@ describe('Module', function () {
             class Service3 {
             }
 
-            module.service('service1', Service1);
-            module.service('service2', Service2);
-            module.service('service3', Service3);
+            module.factory("service1", () => new Service1());
+            module.factory("service2", () => new Service2());
+            module.factory("service3", () => new Service3());
             module.run(function (service1, service2, service3) {
                 service1.should.be.an.instanceof(Service1);
                 service2.should.be.an.instanceof(Service2);
@@ -63,23 +69,28 @@ describe('Module', function () {
         });
     });
 
-    describe('#factory()', function () {
+    describe("#provider()", function () {
         this.timeout(1000);
-        it('should be injected', function () {
-            let module = radis.module('module', []);
+        it("should be injected", function () {
+            let module = radis.module("module", []);
 
-            class Service1 {
-            }
-            class Service2 {
-            }
-            class Service3 {
+            function Service1Provider() {
+                this.$get = () => "s1";
             }
 
-            module.factory('service1', () => new Service1());
-            module.factory('service2', () => new Service2());
-            module.factory('service3', () => new Service3());
+            function Service2Provider() {
+                this.$get = () => "s2";
+            }
+
+            function Service3Provider() {
+                this.$get = () => "s3";
+            }
+
+            module.provider("service1", Service1Provider);
+            module.provider("service2", Service2Provider);
+            module.provider("service3", Service3Provider);
             module.run(function (service1, service2, service3) {
-                service1.should.be.an.instanceof(Service1);
+                service1.should.be.equal(Service1);
                 service2.should.be.an.instanceof(Service2);
                 service3.should.be.an.instanceof(Service3);
             });
@@ -87,78 +98,141 @@ describe('Module', function () {
         });
     });
 
-    describe('#provider()', function () {
-        this.timeout(1000);
-        it('should be injected', function () {
-            let module = radis.module('module', []);
+    describe("#config()", function () {
 
-            class Service1 {
-            }
-            class Service2 {
-            }
-            class Service3 {
-            }
+        it("should call config with the provider", function () {
+            let module = radis.module("module", []);
 
             class Service1Provider {
+                setString(string) {
+                    this.string = string;
+                }
+
                 $get() {
-                    return new Service1();
+                    return this.string;
                 }
             }
 
-            class Service2Provider {
-                $get() {
-                    return new Service2();
-                }
-            }
+            module.provider("service1", Service1Provider);
 
-            class Service3Provider {
-                $get() {
-                    return new Service3();
-                }
-            }
-
-            module.provider('service1', Service1Provider);
-            module.provider('service2', Service2Provider);
-            module.provider('service3', Service3Provider);
-            module.run(function (service1, service2, service3) {
-                service1.should.be.an.instanceof(Service1);
-                service2.should.be.an.instanceof(Service2);
-                service3.should.be.an.instanceof(Service3);
+            module.config(function (service1Provider) {
+                service1Provider.setString("value");
             });
+
+            module.run(function (service1) {
+                service1.should.be.equal("value");
+            });
+
             module.bootstrap();
         });
     });
+});
 
-    describe('#config()', function () {
-        let module = radis.module('module', []);
+describe("Injector", function () {
 
-        class Service1Provider {
-            setString(string) {
-                this.string = string;
-            }
+    it("the injector should be injected", function () {
+        radis.module("module", [])
+            .run(($injector) => {
+                $injector.should.be.an.instanceof(Injector);
+            })
+            .bootstrap();
 
-            $get() {
-                return this.string;
-            }
-        }
-
-        module.provider('service1', Service1Provider);
-
-        module.config(function (service1Provider) {
-            service1Provider.setString('value');
-        });
-
-        module.run(function (service1) {
-            service1.should.be.equal('value');
-        });
-
-        module.bootstrap();
     });
+});
 
-    describe("#getInjector()", function () {
-        it("shoul return the injector", function () {
-            let module = radis.module('module', []);
-            module.getInjector().should.be.an.instanceof(Injector);
+describe("ModuleDependencies", function () {
+    describe("Simple dependency", function () {
+        it("should get the dependency service", function () {
+            let m1 = radis.module("m1", []).factory("s1", () => "s1");
+            let m2 = radis.module("m2", [m1]).factory("s2", () => "s2");
+            let m3 = radis.module("m3", [m2]).factory("s3", () => "s3");
+
+            m2.run((s1, s2) => {
+                s1.should.be.equal("s1");
+                s2.should.be.equal("s2");
+            });
+
+            m3.run((s1, s2, s3) => {
+                s1.should.be.equal("s1");
+                s2.should.be.equal("s2");
+                s3.should.be.equal("s3");
+            });
+
+            m3.bootstrap();
+        });
+
+        it("should override the child dependency", function () {
+            let m1 = radis.module("m1", []).factory("service", () => "s1");
+            let m2 = radis.module("m2", [m1]).factory("service", () => "s2");
+            let m3 = radis.module("m3", [m2, m1]).factory("service", () => "s3");
+
+            m1.run((service) => service.should.be.equal("s1"));
+            m2.run((service) => service.should.be.equal("s2"));
+            m3.run((service) => service.should.be.equal("s3"));
+
+            m3.bootstrap();
+        });
+
+        it("should get the closest child dependency", function () {
+            let m1 = radis.module("m1", []).factory("service", () => "s1");
+            let m2 = radis.module("m2", [m1]).factory("service", () => "s2");
+            let m3 = radis.module("m3", [m2]);
+
+            m3.run((service) => service.should.be.equal("s2"));
+            m3.bootstrap();
+        });
+
+        it("should call dependency first", function () {
+            let m1 = radis.module("m1", []).factory("s1", () => "s1");
+            let m2 = radis.module("m2", [m1]).factory("s2", () => "s2");
+
+            let count = 0;
+
+            m1.config((s1Provider) => expect(count++).to.be.equal(0));
+            m1.run((s1) => expect(count++).to.be.equal(2));
+
+            m2.config((s2Provider) => expect(count++).to.be.equal(1));
+            m2.run((s2) => expect(count++).to.be.equal(3));
+
+            m2.bootstrap();
+        });
+
+
+        it("should get a shared instance", function () {
+            let m1 = radis.module("m1").factory("s", () => ({v: 0}));
+            let m2 = radis.module("m2", [m1]);
+            let m3 = radis.module("m2", [m1]);
+            let m4 = radis.module("m2", [m2, m3]);
+
+            m1.run((s) => expect(s.v++).to.be.equal(0));
+            m2.run((s) => expect(s.v++).to.be.equal(1));
+            m3.run((s) => expect(s.v++).to.be.equal(2));
+            m4.run((s) => expect(s.v++).to.be.equal(3));
+
+            m4.bootstrap();
+        });
+
+        it("should be call in the right order", function () {
+            let count = 0;
+
+            let m1 = radis.module("m1").factory("s", () => {
+                expect(count++).to.be.equal(4);
+            });
+            let m2 = radis.module("m2", [m1]);
+            let m3 = radis.module("m2", [m1]);
+            let m4 = radis.module("m2", [m2, m3]);
+
+            m1.config((sProvider) => expect(count++).to.be.equal(0));
+            m2.config((sProvider) => expect(count++).to.be.equal(1));
+            m3.config((sProvider) => expect(count++).to.be.equal(2));
+            m4.config((sProvider) => expect(count++).to.be.equal(3));
+
+            m1.run((s) => expect(count++).to.be.equal(5));
+            m2.run((s) => expect(count++).to.be.equal(6));
+            m3.run((s) => expect(count++).to.be.equal(7));
+            m4.run((s) => expect(count++).to.be.equal(8));
+
+            m4.bootstrap();
         });
     });
 });
