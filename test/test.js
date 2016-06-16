@@ -90,9 +90,9 @@ describe("Module", function () {
             module.provider("service2", Service2Provider);
             module.provider("service3", Service3Provider);
             module.run(function (service1, service2, service3) {
-                service1.should.be.equal(Service1);
-                service2.should.be.an.instanceof(Service2);
-                service3.should.be.an.instanceof(Service3);
+                service1.should.be.equal("s1");
+                service2.should.be.equal("s2");
+                service3.should.be.equal("s3");
             });
             module.bootstrap();
         });
