@@ -1,7 +1,5 @@
 "use strict";
 
-let _ = require("lodash");
-
 /**
  * @class Injector
  * @property {Map<string, ServiceStore>} services
@@ -33,7 +31,7 @@ class Injector {
 
         let func = injectable.pop();
 
-        let services = _.map(injectable, (serviceName) => this._getService(serviceName, locales));
+        let services = injectable.map((serviceName) => this._getService(serviceName, locales));
         return func.apply(self, services);
     }
 
@@ -49,7 +47,7 @@ class Injector {
 
         let serviceNames = injectableClass["$inject"] !== undefined ? injectableClass["$inject"] : [];
 
-        let services = _.map(serviceNames, (serviceName) => this._getService(serviceName, locales));
+        let services = serviceNames.map((serviceName) => this._getService(serviceName, locales));
 
         return new injectableClass(...services);
     }
@@ -63,7 +61,7 @@ class Injector {
      */
     _getService(serviceName, locales) {
 
-        if (_.has(locales, serviceName))
+        if (locales[serviceName] !== undefined)
             return locales[serviceName];
 
         if (serviceName === "$injector")

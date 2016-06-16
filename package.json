@@ -20,9 +20,6 @@
     "url": "https://github.com/jerome-quere/radis/issues"
   },
   "homepage": "https://github.com/jerome-quere/radis#readme",
-  "dependencies": {
-    "lodash": "4"
-  },
   "devDependencies": {
     "chai": "^3.5.0",
     "eslint": "^2.12.0",
