@@ -2,14 +2,22 @@
 
 let Injector = require("./Injector");
 
+
+/**
+ * @typedef {Object} Service
+ * @typedef {{$get: function():Object}} IProvider
+ * @typedef {function(new:IProvider)} IProviderClass
+ * @typedef {{providerClass: !IProviderClass, provider: ?IProvider, service: ?Service}} ServiceStore
+ */
+
 /**
  * @class Module
+ * @typedef {String[]|function} Injectable
  * @property {string} name
  * @property {Module[]} dependencies
- * @property {Injector} $injector
- * @property {Map} services
- * @property {function[]} configHooks
- * @property {function[]} runHooks
+ * @property {Map<string, IProviderClass>} services
+ * @property {Injectable[]} configHooks
+ * @property {Injectable[]} runHooks
  */
 class Module {
 
@@ -18,17 +26,12 @@ class Module {
      * @param {Module[]} dependencies An array of dependencies modules
      */
     constructor(name, dependencies) {
-        this._bootstraped = false;
-
         this.name = name;
         this.dependencies = dependencies;
-        this.$injector = new Injector(dependencies);
 
         this.services = new Map();
         this.configHooks = [];
         this.runHooks = [];
-
-        this.$injector.addModule(this);
     }
 
     /**
@@ -39,177 +42,121 @@ class Module {
     }
 
     /**
-     * @param {array | function} injectArray A config hook function
+     * @param {Injectable} injectable A config hook function
      * @returns {Module} The current module
      */
-    config(injectArray) {
-        this.configHooks.push(injectArray);
+    config(injectable) {
+        this.configHooks.push(injectable);
         return this;
     }
 
     /**
-     * @param {array | function } injectArray A run hook function
+     * @param {Injectable} injectable A run hook function
      * @returns {Module} The current module
      */
-    run(injectArray) {
-        this.runHooks.push(injectArray);
+    run(injectable) {
+        this.runHooks.push(injectable);
         return this;
     }
 
     /**
      * Register a new service in the module
-     * @param {string} name the service name
-     * @param {function} constructor The service constructor
-     * @returns {Module} The current module
+     * @param {string} serviceName the service name
+     * @param {function(new:Service)} serviceClass The service class
+     * @returns {Module} this
      */
-    service(name, constructor) {
-        let that = this;
-
-        this.services.set(name, {
-            provider: function () {
-                this.$get = () => {
-                    return that.$injector.instantiate(constructor);
-                };
-            },
-            instance: null,
-            service: null
+    service(serviceName, serviceClass) {
+        this.services.set(serviceName, function () {
+            this.$get = ($injector) => {
+                return $injector.instantiate(constructor);
+            };
         });
         return this;
     }
 
     /**
      * Register a new service in the module by providing a factory
-     * @param {string} name the name of the service
-     * @param {array | function} injectArray The function responsible of
-     * creating the service instance. This function will be call once
-     * when the service instance is required.
-     * @returns {Module} The current module
+     * @param {string} serviceName the name of the service
+     * @param {Injectable} injectable The function responsible of
+     * creating the service instance.
+     * @returns {Module} this
      */
-    factory(name, injectArray) {
-        this.services.set(name, {
-            provider: function () {
-                this.$get = injectArray;
-            },
-            instance: null,
-            service: null
+    factory(serviceName, injectable) {
+        this.services.set(serviceName, function () {
+            this.$get = injectable;
         });
         return this;
     }
 
     /**
      * Register a new service in the module by providing a provider class
-     * @param {string} name The service name
-     * @param {function} provider A provider constructor
-     * @returns {Module} the current module
+     * @param {string} serviceName The service name
+     * @param {IProviderClass} providerClass A provider constructor
+     * @returns {Module} this
      */
-    provider(name, provider) {
-        this.services.set(name, {
-            provider: provider,
-            instance: null,
-            service: null
-        });
+    provider(serviceName, providerClass) {
+        this.services.set(serviceName, providerClass);
         return this;
+    }
+
+    /**
+     * Bootstrap the module
+     * @return {Injector} The module injector
+     */
+    bootstrap() {
+        let modules = [];
+        let $injectors = [];
+
+        let $injector = this._bootstrap(modules, $injectors);
+
+        modules.push(this);
+        $injectors.push($injector);
+
+        //TODO maybe throw if a service instance try to be injected in the config hook
+        modules.forEach((module, i) => {
+            module.configHooks.forEach((hook) => $injectors[i].invoke(hook));
+        });
+
+        modules.forEach((module, i) => {
+            module.runHooks.forEach((hook) => $injectors[i].invoke(hook));
+        });
+
+        return $injector;
     }
 
     /**
      * Bootstrap the module.
-     * @warning This method must be called once.
-     * @returns {Module} the current module
+     * @param {Module[]} modules An array of module
+     * @param {Injector[]} $injectors An array of corresponding injector
+     * @returns {Injector} the newly created injector
      */
-    bootstrap() {
-        if (this._bootstraped !== false) {
-            throw new Error("A module should be bootstraped only once");
-        }
-        this._bootstraped = true;
-        this._runConfigHooks();
-        this._runRunHooks();
-        return this;
-    }
+    _bootstrap(modules, $injectors) {
+        let $injector = new Injector();
 
-    /**
-     * @returns {Injector} the module injector
-     */
-    getInjector() {
-        return this.$injector;
-    }
+        this.dependencies.forEach((dependency) => {
 
-    /**
-     * @param {string} name the service name
-     * @returns {*} the service
-     */
-    _getService(name) {
-
-        if (name.endsWith("Provider")) {
-            name = name.substr(0, name.length - "Provider".length);
-            return this._getProvider(name);
-        }
-
-        let provider = this._getProvider(name);
-        if (provider === null) {
-            return null;
-        }
-
-        let serviceConfig = this.services.get(name);
-
-        if (serviceConfig.service === null) {
-            let service = this.$injector.invoke(provider.$get, provider);
-            if (service === null || service === undefined) {
-                throw new Error("A service cannot be null or undefined");
+            let moduleIndex = modules.indexOf(dependency);
+            if (moduleIndex === -1) {
+                $injectors.push(dependency._bootstrap(modules, $injectors));
+                modules.push(dependency);
+                moduleIndex = modules.length - 1;
             }
-            serviceConfig.service = service;
-        }
 
-        return serviceConfig.service;
-    }
-
-    /**
-     * @param {string} name the service name
-     * @returns {*} The provider of the service
-     * @private
-     */
-    _getProvider(name) {
-
-        if (!this.services.has(name)) {
-            return null;
-        }
-
-        let serviceConfig = this.services.get(name);
-
-        if (!serviceConfig.instance) {
-            serviceConfig.instance = new serviceConfig.provider();
-        }
-
-        return serviceConfig.instance;
-    }
-
-    /**
-     * @return {void}
-     * @private
-     */
-    _runConfigHooks() {
-        this.dependencies.forEach((module) => {
-            module._runConfigHooks();
+            $injectors[moduleIndex].services.forEach((serviceStore, serviceName) => {
+                $injector._addServiceStore(serviceName, serviceStore);
+            });
         });
 
-        for (let hook of this.configHooks) {
-            this.$injector.invoke(hook);
-        }
-    }
-
-    /**
-     * @return {void}
-     * @private
-     */
-    _runRunHooks() {
-        this.dependencies.forEach((module) => {
-            module._runRunHooks();
+        this.services.forEach((providerClass, serviceName) => {
+            $injector._addServiceStore(serviceName, {
+                providerClass: providerClass,
+                provider: null,
+                service: null
+            });
         });
 
-        for (let hook of this.runHooks) {
-            this.$injector.invoke(hook);
-        }
+        return $injector;
     }
-
 }
 
 module.exports = Module;
