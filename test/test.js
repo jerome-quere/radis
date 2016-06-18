@@ -32,14 +32,22 @@ describe("Module", function () {
     describe("#service()", function () {
         this.timeout(1000);
         it("should be injected", function () {
+
+            class Service1 {
+            }
+            class Service2 {
+            }
+            class Service3 {
+            }
+
             let module = radis.module("module", [])
-                .factory("s1", () => "s1")
-                .factory("s2", () => "s2")
-                .factory("s3", () => "s3")
+                .service("s1", Service1)
+                .service("s2", Service2)
+                .service("s3", Service3)
                 .run(function (s1, s2, s3) {
-                    s1.should.be.equal("s1");
-                    s2.should.be.equal("s2");
-                    s3.should.be.equal("s3");
+                    s1.should.be.an.instanceof(Service1);
+                    s2.should.be.an.instanceof(Service2);
+                    s3.should.be.an.instanceof(Service3);
                 });
             module.bootstrap();
         });

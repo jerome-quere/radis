@@ -68,7 +68,7 @@ class Module {
     service(serviceName, serviceClass) {
         this.services.set(serviceName, function () {
             this.$get = ($injector) => {
-                return $injector.instantiate(constructor);
+                return $injector.instantiate(serviceClass);
             };
         });
         return this;
