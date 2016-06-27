@@ -127,8 +127,8 @@ class Injector {
             throw new Error(`Can't build inject array with ${funcStr}`);
         }
 
-        if (match[1].replace(/ /g, "")) {
-            deps = match[1].replace(/ /g, "").split(",");
+        if (match[1].replace(/\s/mg, "")) {
+            deps = match[1].replace(/\s/mg, "").split(",");
         }
 
         deps.push(func);
