@@ -92,7 +92,7 @@ class Injector {
      */
     _getProvider(serviceName) {
         if (!this.services.has(serviceName))
-            throw new Error(`Can't load service with name ${name}`);
+            throw new Error(`Can't load service with name ${serviceName}`);
 
         let serviceStore = this.services.get(serviceName);
         if (serviceStore.provider === null)
