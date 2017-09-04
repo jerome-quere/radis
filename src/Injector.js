@@ -32,7 +32,7 @@ class Injector {
         if (locals === undefined || locals === null)
             locals = {};
 
-        if (typeof injectable === "function")
+        if ( utils.isFunction(injectable) )
             injectable = Injector._buildInjectArray(injectable);
 
         let func = injectable.pop();
@@ -92,7 +92,7 @@ class Injector {
         if (paramNames === undefined || paramNames === null)
             paramNames = [];
 
-        if (typeof injectable === "function")
+        if ( utils.isFunction(injectable) )
             injectable = Injector._buildInjectArray(injectable);
 
         let func = injectable.pop();
