@@ -71,7 +71,7 @@ class Injector {
      * let liftedMiddleware = $injector.lift(middleware, ["req", "res", "next"]);
      * app.use(liftedMiddleware) OR  liftedMiddleware(req, res, next(
      * @param {Function|Injectable} injectable The function you want to lift
-     * @param {string[]} localNames the name of the parameter lift will received so they can be injected.
+     * @param {string[]=} localNames the name of the parameter lift will received so they can be injected.
      * @return {Function} The lifted function
      */
     lift(injectable, localNames) {
