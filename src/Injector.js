@@ -26,11 +26,19 @@ class Injector {
      * @return {*} The return value of injectable
      */
     invoke(injectable, self, locals) {
-        if (self === undefined || self === null)
-            self = this;
 
         if (locals === undefined || locals === null)
             locals = {};
+
+        if ( utils.isString(injectable) && utils.serviceMethodNameRegex.test(injectable) ) {
+            let _tmp = injectable.split(":");
+            if ( self === null || self === undefined )
+                self = this._getService(_tmp[0], locals);
+            injectable = self[_tmp[1]];
+        }
+
+        if (self === undefined || self === null)
+            self = this;
 
         if ( utils.isFunction(injectable) )
             injectable = Injector._buildInjectArray(injectable);
@@ -76,13 +84,14 @@ class Injector {
      * let liftedMiddleware = $injector.lift(middleware, ["req", "res", "next"]);
      * app.use(liftedMiddleware) OR  liftedMiddleware(req, res, next(
      * @param {Function|Injectable} injectable The function you want to lift
-     * @param {?object} [self] An object to which the injectable function will be bind to
+     * @param {object|string[]} [self] An object to which the injectable function will be bind to
      * @param {string[]=} paramNames the name of the parameter lift will received so they can be injected.
      * @param {?object} [locals] Additional variables that will be injected
      * @return {Function} The lifted function
      */
     lift(injectable, self, paramNames, locals) {
 
+        // Re-arrange parameters if no self is provided
         if ( utils.isArray(self) ) {
             locals = paramNames;
             paramNames = self;
@@ -92,21 +101,46 @@ class Injector {
         if (paramNames === undefined || paramNames === null)
             paramNames = [];
 
-        if ( utils.isFunction(injectable) )
-            injectable = Injector._buildInjectArray(injectable);
-
-        let func = injectable.pop();
-
+        let cache = null;
         let that = this;
         return function () {
+
+            // Merge locals and positional params
             let _locals = Object.assign({}, locals);
             let args = arguments;
             paramNames.forEach((name, index) => {
                 _locals[name] = args[index];
             });
 
-            let services = injectable.map((serviceName) => that._getService(serviceName, _locals));
-            return func.apply(self, services);
+            // If injection was already resolve use cached version.
+            if (cache)
+                return cache(_locals);
+
+            // Handle serviceMethod injectable
+            if ( utils.isString(injectable) && utils.serviceMethodNameRegex.test(injectable) ) {
+                let _tmp = injectable.split(":");
+                if ( self === null || self === undefined )
+                    self = that._getService(_tmp[0], _locals);
+
+                if ( !utils.isFunction(self[_tmp[1]]) )
+                    throw new Error(`Invalid serviceMethod injectable ${injectable}. No method ${_tmp[1]} found in service ${_tmp[0]}`);
+                injectable = self[_tmp[1]];
+            }
+
+            if (self === undefined || self === null)
+                self = this;
+
+            if ( utils.isFunction(injectable) )
+                injectable = Injector._buildInjectArray(injectable);
+
+            let func = injectable.pop();
+
+            cache = (locals) => {
+                let services = injectable.map((serviceName) => that._getService(serviceName, locals));
+                return func.apply(self, services);
+            };
+
+            return cache(_locals);
         };
     }
 
@@ -177,6 +211,7 @@ class Injector {
      * @private
      */
     static _buildInjectArray(func) {
+        /** @type {Array} */
         let deps = functionArguments(func);
 
         /*

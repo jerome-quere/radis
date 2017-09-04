@@ -79,14 +79,82 @@ describe("Injector", function () {
         });
     });
 
-    describe("lift", function () {
+    describe("#invoke", function () {
         let module;
         let $injector;
+
+        class Service3 {
+            constructor() { this.a = 42; }
+            // noinspection JSUnusedGlobalSymbols
+            getValue() { return this.a; }
+            // noinspection JSUnusedGlobalSymbols
+            addLocale(local1) { return this.a + local1; }
+            // noinspection JSUnusedGlobalSymbols
+            addService(s1) { return this.a + s1; }
+        }
 
         beforeEach(function () {
             module = radis.module("module", [])
                 .factory("s1", () => "s1")
                 .factory("s2", () => "s2")
+                .service("s3", Service3)
+                .run(["$injector", (s) => $injector = s])
+                .bootstrap();
+        });
+
+        it("Should inject services", function () {
+            let injectable = function (s1, s2) {
+                s1.should.be.equal("s1");
+                s2.should.be.equal("s2");
+            };
+            $injector.invoke(injectable);
+        });
+
+        it("Should inject self", function () {
+            let self = { a: 42 };
+            let injectable = function (s1, s2) {
+                s1.should.be.equal("s1");
+                s2.should.be.equal("s2");
+                this.a.should.be.equal(42);
+            };
+            $injector.invoke(injectable, self);
+        });
+
+        it("Should inject locale", function () {
+            let injectable = function (s1, s2, local1) {
+                s1.should.be.equal("s1");
+                s2.should.be.equal("s2");
+                local1.should.be.equal("local1");
+            };
+            $injector.invoke(injectable, null, {local1: "local1"});
+        });
+
+        it("Should invoke service method", function () {
+            $injector.invoke("s3:getValue").should.be.equal(42);
+            $injector.invoke("s3:addLocale", null, {local1: 5}).should.be.equal(47);
+            $injector.invoke("s3:addService").should.be.equal("42s1");
+        });
+    });
+
+    describe("#lift", function () {
+        let module;
+        let $injector;
+
+        class Service3 {
+            constructor() { this.a = 42; }
+            // noinspection JSUnusedGlobalSymbols
+            getValue() { return this.a; }
+            // noinspection JSUnusedGlobalSymbols
+            addLocale(local1) { return this.a + local1; }
+            // noinspection JSUnusedGlobalSymbols
+            addService(s1) { return this.a + s1; }
+        }
+
+        beforeEach(function () {
+            module = radis.module("module", [])
+                .factory("s1", () => "s1")
+                .factory("s2", () => "s2")
+                .service("s3", Service3)
                 .run(["$injector", (s) => $injector = s])
                 .bootstrap();
         });
@@ -103,9 +171,8 @@ describe("Injector", function () {
             $injector.lift(injectable)();
         });
 
-
-        it("Should return a function", function () {
-            $injector.lift(() => null, ["local1", "local2"]).should.be.an.instanceof(Function);
+        it("Should lift an injectable array", function () {
+            $injector.lift(["s1", (test) => test.should.be.equal("s1")])();
         });
 
         it("Should inject all the services, params and locale", function () {
@@ -144,5 +211,18 @@ describe("Injector", function () {
             $injector.lift(injectable, self, ["param1", "param2"], {local1: "local1", local2: "local2"})("param1", "param2");
         });
 
+        it("Should invoke service method", function () {
+            $injector.lift("s3:getValue")().should.be.equal(42);
+            $injector.lift("s3:addLocale", null, [], {local1: 5})().should.be.equal(47);
+            $injector.lift("s3:addLocale", null, ["local1"])(10).should.be.equal(52);
+            $injector.lift("s3:addService")().should.be.equal("42s1");
+            chai.expect(() => $injector.lift("s1:getValue")()).to.throw(Error);
+        });
+
+        it("Should cache correctly", function () {
+            let fn = $injector.lift("s3:getValue");
+            fn().should.be.equal(42);
+            fn().should.be.equal(42);
+        });
     });
 });

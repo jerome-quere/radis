@@ -15,7 +15,7 @@ const
 
 /**
  * @class Module
- * @typedef {String[]|function} Injectable
+ * @typedef {String|String[]|function} Injectable
  * @property {string} name
  * @property {Module[]} dependencies
  * @property {Map<string, IProviderClass>} services

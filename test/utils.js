@@ -36,6 +36,20 @@ describe("Utils", function () {
         });
     });
 
+    describe("#isString", function () {
+        it("should test if value is a string", function () {
+            expect(utils.isString([])).to.be.equal(false);
+            expect(utils.isString([1])).to.be.equal(false);
+            expect(utils.isString(new Array(1))).to.be.equal(false);
+            expect(utils.isString("")).to.be.equal(true);
+            expect(utils.isString(42)).to.be.equal(false);
+            expect(utils.isString(true)).to.be.equal(false);
+            expect(utils.isString(function (){})).to.be.equal(false);
+            expect(utils.isString({})).to.be.equal(false);
+            expect(utils.isString(new function (){})).to.be.equal(false);
+        });
+    });
+
     describe("#isInjectable", function () {
         it("should test if value is an Injectable", function () {
             expect(utils.isInjectable(function (){})).to.be.equal(true);

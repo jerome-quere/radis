@@ -13,12 +13,27 @@ const moduleNameRegex = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
 const serviceNameRegex = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
 
 /**
+ * The service method name RegExp
+ * @type {RegExp}
+ */
+const serviceMethodNameRegex = /^[a-zA-Z_][a-zA-Z0-9_]*:[^:]+$/;
+
+/**
  * Test if value is an array
  * @param  {*} value the value you want to test
  * @return {boolean} True is value is an array
  */
 function isArray( value ) {
     return Array.isArray(value);
+}
+
+/**
+ * Test if value is a string
+ * @param  {*} value the value you want to test
+ * @return {boolean} True is value is a string
+ */
+function isString( value ) {
+    return typeof value === "string";
 }
 
 /**
@@ -29,6 +44,7 @@ function isArray( value ) {
 function isFunction( value ) {
     return !!(value && value.constructor && value.call && value.apply);
 }
+
 
 /**
  * Test if value is an Injectable
@@ -61,9 +77,11 @@ function isServiceName( name ) {
 module.exports = {
     isArray: isArray,
     isFunction: isFunction,
+    isString: isString,
     isInjectable: isInjectable,
     isModuleName: isModuleName,
     isServiceName: isServiceName,
     moduleNameRegex: moduleNameRegex,
-    serviceNameRegex: serviceNameRegex
+    serviceNameRegex: serviceNameRegex,
+    serviceMethodNameRegex: serviceMethodNameRegex
 };
