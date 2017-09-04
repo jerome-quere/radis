@@ -6,7 +6,7 @@ let Injector = require("./Injector");
 /**
  * @typedef {Object} Service
  * @typedef {{$get: function():Object}} IProvider
- * @typedef {function(new:IProvider, Injector)} IProviderClass
+ * @typedef {function(new:IProvider, Injector, string)} IProviderClass
  * @typedef {{providerClass: !IProviderClass, provider: ?IProvider, service: ?Service}} ServiceStore
  */
 
@@ -68,7 +68,7 @@ class Module {
     service(serviceName, serviceClass) {
         this.services.set(serviceName, function () {
             this.$get = ($injector) => {
-                return $injector.instantiate(serviceClass);
+                return $injector.instantiate(serviceClass, { $name: serviceName });
             };
         });
         return this;

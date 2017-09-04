@@ -51,6 +51,23 @@ describe("Module", function () {
                 });
             module.bootstrap();
         });
+        it("should be injected with $name", function () {
+
+            class Service1 {
+                static get $inject() { return ["$name"]; }
+                constructor($name) {
+                    this.$name = $name;
+                }
+            }
+
+            radis.module("module", [])
+                .service("s1", Service1)
+                .run(function (s1) {
+                    s1.$name.should.be.equal("s1");
+                })
+                .bootstrap()
+            ;
+        });
     });
 
     describe("#factory()", function () {
@@ -74,6 +91,16 @@ describe("Module", function () {
                 service3.should.be.an.instanceof(Service3);
             });
             module.bootstrap();
+        });
+        it("should be injected with $name", function () {
+
+            radis.module("module", [])
+                .factory("s1", ($name) => $name)
+                .run(function (s1) {
+                    s1.should.be.equal("s1");
+                })
+                .bootstrap()
+            ;
         });
     });
 
@@ -104,7 +131,7 @@ describe("Module", function () {
             });
             module.bootstrap();
         });
-        it("should receive the right constructor parameters", function () {
+        it("should receive the $injector as first constructor parameter", function () {
             let m1 = radis.module("m1", []);
             let m2 = radis.module("m2", []);
             let m3 = radis.module("m3", [m1, m2]);
@@ -122,6 +149,38 @@ describe("Module", function () {
             m1.run(($injector, s1) => s1.should.be.equal($injector));
             m2.run(($injector, s2) => s2.should.be.equal($injector));
             m3.bootstrap();
+        });
+        it("should receive $name as second constructor parameter", function () {
+            let m1 = radis.module("m1", []);
+            let m2 = radis.module("m2", []);
+            let m3 = radis.module("m3", [m1, m2]);
+
+            // noinspection JSUnusedLocalSymbols
+            function Service1Provider($injector, $name) {
+                this.$get = () => $name;
+            }
+
+            // noinspection JSUnusedLocalSymbols
+            function Service2Provider($injector, $name) {
+                this.$get = () => $name;
+            }
+
+            m1.provider("s1", Service1Provider);
+            m2.provider("s2", Service2Provider);
+            m1.run((s1) => s1.should.be.equal("s1"));
+            m2.run((s2) => s2.should.be.equal("s2"));
+            m3.bootstrap();
+        });
+        it("$get should receive $name as parameter", function () {
+            let module = radis.module("m1", []);
+
+            function Service1Provider() {
+                this.$get = ($name) => $name;
+            }
+
+            module.provider("s1", Service1Provider);
+            module.run((s1) => s1.should.be.equal("s1"));
+            module.bootstrap();
         });
     });
 

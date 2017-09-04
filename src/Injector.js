@@ -122,7 +122,7 @@ class Injector {
         let provider = this._getProvider(serviceName);
 
         if (serviceStore.service === null)
-            serviceStore.service = this.invoke(provider.$get, provider);
+            serviceStore.service = this.invoke(provider.$get, provider, { $name: serviceName });
 
         if (serviceStore.service === null)
             throw new Error(`The service "${serviceName} cannot be null`);
@@ -141,7 +141,7 @@ class Injector {
 
         let serviceStore = this.services.get(serviceName);
         if (serviceStore.provider === null)
-            serviceStore.provider = new serviceStore.providerClass(this);
+            serviceStore.provider = new serviceStore.providerClass(this, serviceName);
 
         return serviceStore.provider;
     }
