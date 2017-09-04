@@ -206,7 +206,7 @@ describe("Injector", function () {
             module = radis.module("module", [])
                 .factory("s1", () => "s1")
                 .factory("s2", () => "s2")
-                .run(['$injector', (s) => $injector = s])
+                .run(["$injector", (s) => $injector = s])
                 .bootstrap();
         });
 
