@@ -4,6 +4,7 @@ let chai = require("chai"),
     radis = require("../index.js"),
     Injector = require("../src/Injector.js")
 ;
+chai.should();
 
 describe("Injector", function () {
 
@@ -26,18 +27,29 @@ describe("Injector", function () {
     });
 
 
-    it("The injector should work with multiline declaration function", function () {
+    it("The injector should parse all kind of function declaration", function () {
         radis.module("module", [])
             .factory("s1", () => "s1")
             .factory("s2", () => "s2")
-            .factory("s3", () => "s3")
-            .run((s1,
-                  s2,
-                  s3) => {
+            .run(function (s1) { s1.should.be.equal("s1"); })
+            .run(function (/* Comment */s1/* Comment */) { s1.should.be.equal("s1"); })
+            .run(function (
+                s1,
+                s2
+            ) {
                 s1.should.be.equal("s1");
                 s2.should.be.equal("s2");
-                s3.should.be.equal("s3");
             })
+            .run((s1) => { s1.should.be.equal("s1"); })
+            .run((/* Comment */s1/* Comment */) => { s1.should.be.equal("s1"); })
+            .run((
+                s1,
+                s2
+            ) => {
+                s1.should.be.equal("s1");
+                s2.should.be.equal("s2");
+            })
+            .run(s1 => s1.should.be.equal("s1"))
             .bootstrap();
     });
 

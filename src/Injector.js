@@ -1,5 +1,7 @@
 "use strict";
 
+const functionArguments = require("function-arguments");
+
 /**
  * @class Injector
  * @property {Map<string, ServiceStore>} services
@@ -164,16 +166,19 @@ class Injector {
      * @private
      */
     static _buildInjectArray(func) {
-        let funcStr = func.toString();
-        let match;
-        let deps = [];
+        let deps = functionArguments(func);
 
-        if (!(match = funcStr.match(/^\s*[^\(]*\(\s*([^\)]*)\)/m))) {
-            throw new Error(`Can't build inject array with ${funcStr}`);
-        }
-
-        if (match[1].replace(/\s/mg, "")) {
-            deps = match[1].replace(/\s/mg, "").split(",");
+        /*
+         * Handle single param arrow function without params with one line return
+         * eg: v => true
+         * https://github.com/charlike/function-arguments/issues/2
+         */
+        if (deps.length === 1 && deps[0] === "") {
+            let funcStr = func.toString();
+            let params = funcStr.replace(/\s/mg, "").split("=>");
+            if ( params.length < 2 )
+                throw new Error("Can't parse params for function ${params}");
+            deps = [params[0]];
         }
 
         deps.push(func);
