@@ -70,7 +70,7 @@ class Injector {
      * let middleware = (service1, req, res, nex) => console.log(service1, req, res, next)
      * let liftedMiddleware = $injector.lift(middleware, ["req", "res", "next"]);
      * app.use(liftedMiddleware) OR  liftedMiddleware(req, res, next(
-     * @param {Function} injectable The function you want to lift
+     * @param {Function|Injectable} injectable The function you want to lift
      * @param {string[]} localNames the name of the parameter lift will received so they can be injected.
      * @return {Function} The lifted function
      */
@@ -141,7 +141,7 @@ class Injector {
 
         let serviceStore = this.services.get(serviceName);
         if (serviceStore.provider === null)
-            serviceStore.provider = new serviceStore.providerClass();
+            serviceStore.provider = new serviceStore.providerClass(this);
 
         return serviceStore.provider;
     }

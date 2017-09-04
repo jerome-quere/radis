@@ -104,6 +104,25 @@ describe("Module", function () {
             });
             module.bootstrap();
         });
+        it("should receive the right constructor parameters", function () {
+            let m1 = radis.module("m1", []);
+            let m2 = radis.module("m2", []);
+            let m3 = radis.module("m3", [m1, m2]);
+
+            function Service1Provider($injector) {
+                this.$get = () => $injector;
+            }
+
+            function Service2Provider($injector) {
+                this.$get = () => $injector;
+            }
+
+            m1.provider("s1", Service1Provider);
+            m2.provider("s2", Service2Provider);
+            m1.run(($injector, s1) => s1.should.be.equal($injector));
+            m2.run(($injector, s2) => s2.should.be.equal($injector));
+            m3.bootstrap();
+        });
     });
 
     describe("#config()", function () {

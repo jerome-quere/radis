@@ -6,7 +6,7 @@ let Injector = require("./Injector");
 /**
  * @typedef {Object} Service
  * @typedef {{$get: function():Object}} IProvider
- * @typedef {function(new:IProvider)} IProviderClass
+ * @typedef {function(new:IProvider, Injector)} IProviderClass
  * @typedef {{providerClass: !IProviderClass, provider: ?IProvider, service: ?Service}} ServiceStore
  */
 
