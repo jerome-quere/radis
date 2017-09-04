@@ -108,14 +108,40 @@ describe("Injector", function () {
             $injector.lift(() => null, ["local1", "local2"]).should.be.an.instanceof(Function);
         });
 
-        it("Should inject all the services and locals", function () {
-            let injectable = (s1, local1, s2, local2) => {
+        it("Should inject all the services, params and locale", function () {
+            let injectable = (s1, param1, s2, param2, local1, local2) => {
                 s1.should.be.equal("s1");
                 s2.should.be.equal("s2");
+                param1.should.be.equal("param1");
+                param2.should.be.equal("param2");
                 local1.should.be.equal("local1");
                 local2.should.be.equal("local2");
             };
-            $injector.lift(injectable, ["local1", "local2"])("local1", "local2");
+            $injector.lift(injectable, ["param1", "param2"], {local1: "local1", local2: "local2"})("param1", "param2");
+        });
+
+        it("Should bind to correct self", function () {
+            let self = { a: 42 };
+            let injectable = function (s1, s2) {
+                s1.should.be.equal("s1");
+                s2.should.be.equal("s2");
+                this.a.should.be.equal(42);
+            };
+            $injector.lift(injectable, self)();
+        });
+
+        it("Should bind to correct self with params and locals", function () {
+            let self = { a: 42 };
+            let injectable = function (s1, param1, s2, param2, local1, local2) {
+                s1.should.be.equal("s1");
+                s2.should.be.equal("s2");
+                param1.should.be.equal("param1");
+                param2.should.be.equal("param2");
+                local1.should.be.equal("local1");
+                local2.should.be.equal("local2");
+                this.a.should.be.equal(42);
+            };
+            $injector.lift(injectable, self, ["param1", "param2"], {local1: "local1", local2: "local2"})("param1", "param2");
         });
 
     });

@@ -1,6 +1,9 @@
 "use strict";
 
-const functionArguments = require("function-arguments");
+const
+    functionArguments = require("function-arguments"),
+    utils = require("./utils")
+;
 
 /**
  * @class Injector
@@ -73,13 +76,21 @@ class Injector {
      * let liftedMiddleware = $injector.lift(middleware, ["req", "res", "next"]);
      * app.use(liftedMiddleware) OR  liftedMiddleware(req, res, next(
      * @param {Function|Injectable} injectable The function you want to lift
-     * @param {string[]=} localNames the name of the parameter lift will received so they can be injected.
+     * @param {?object} [self] An object to which the injectable function will be bind to
+     * @param {string[]=} paramNames the name of the parameter lift will received so they can be injected.
+     * @param {?object} [locals] Additional variables that will be injected
      * @return {Function} The lifted function
      */
-    lift(injectable, localNames) {
+    lift(injectable, self, paramNames, locals) {
 
-        if (localNames === undefined || localNames === null)
-            localNames = [];
+        if ( utils.isArray(self) ) {
+            locals = paramNames;
+            paramNames = self;
+            self = undefined;
+        }
+
+        if (paramNames === undefined || paramNames === null)
+            paramNames = [];
 
         if (typeof injectable === "function")
             injectable = Injector._buildInjectArray(injectable);
@@ -88,14 +99,14 @@ class Injector {
 
         let that = this;
         return function () {
-            let locals = {};
+            let _locals = Object.assign({}, locals);
             let args = arguments;
-            localNames.forEach((name, index) => {
-                locals[name] = args[index];
+            paramNames.forEach((name, index) => {
+                _locals[name] = args[index];
             });
 
-            let services = injectable.map((serviceName) => that._getService(serviceName, locals));
-            return func.apply(this, services);
+            let services = injectable.map((serviceName) => that._getService(serviceName, _locals));
+            return func.apply(self, services);
         };
     }
 
