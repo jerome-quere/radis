@@ -1,6 +1,9 @@
 "use strict";
 
-let Injector = require("./Injector");
+const
+    Injector = require("./Injector"),
+    utils = require("./utils")
+;
 
 
 /**
@@ -46,6 +49,9 @@ class Module {
      * @returns {Module} The current module
      */
     config(injectable) {
+        if ( !utils.isInjectable(injectable) )
+            throw new Error(`Can't register config injectable in ${this.getName()} ${serviceClass}`);
+
         this.configHooks.push(injectable);
         return this;
     }
@@ -55,6 +61,9 @@ class Module {
      * @returns {Module} The current module
      */
     run(injectable) {
+        if ( !utils.isInjectable(injectable) )
+            throw new Error(`Can't register run injectable in ${this.getName()} ${serviceClass}`);
+
         this.runHooks.push(injectable);
         return this;
     }
@@ -66,6 +75,12 @@ class Module {
      * @returns {Module} this
      */
     service(serviceName, serviceClass) {
+        if ( !utils.isServiceName(serviceName) )
+            throw new Error(`Can't register service in ${this.getName()} with name ${serviceName}. serviceName must match ${utils.serviceNameRegex.toString()}`);
+
+        if ( !utils.isFunction(serviceClass) )
+            throw new Error(`Can't register service in ${this.getName()} with name ${serviceName}. Invalid serviceClass ${serviceClass}`);
+
         this.services.set(serviceName, function () {
             this.$get = ($injector) => {
                 return $injector.instantiate(serviceClass, { $name: serviceName });
@@ -82,6 +97,12 @@ class Module {
      * @returns {Module} this
      */
     factory(serviceName, injectable) {
+        if ( !utils.isServiceName(serviceName) )
+            throw new Error(`Can't register factory in ${this.getName()} with name ${serviceName}. serviceName must match ${utils.serviceNameRegex.toString()}`);
+
+        if ( !utils.isInjectable(injectable) )
+            throw new Error(`Can't register factory in ${this.getName()} with name ${serviceName}. Invalid injectable ${injectable}`);
+
         this.services.set(serviceName, function () {
             this.$get = injectable;
         });
@@ -95,6 +116,12 @@ class Module {
      * @returns {Module} this
      */
     provider(serviceName, providerClass) {
+        if ( !utils.isServiceName(serviceName) )
+            throw new Error(`Can't register provider in ${this.getName()} with name ${serviceName}. serviceName must match ${utils.serviceNameRegex.toString()}`);
+
+        if ( !utils.isFunction(providerClass) )
+            throw new Error(`Can't register provider in ${this.getName()} with name ${serviceName}. Invalid providerClass ${providerClass}`);
+
         this.services.set(serviceName, providerClass);
         return this;
     }
