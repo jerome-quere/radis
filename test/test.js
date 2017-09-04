@@ -172,60 +172,6 @@ describe("Injector", function () {
             .bootstrap();
     });
 
-    describe("invokeAsync", function () {
-
-        it("Services should be resolved", function (done) {
-            this.timeout(100);
-            radis.module("module", [])
-                .factory("s1", () => "s1")
-                .factory("s2", () => Promise.resolve("s2"))
-                .run(($injector) => {
-                    $injector.invokeAsync((s1, s2) => {
-                        s1.should.be.equal("s1");
-                        s2.should.be.equal("s2");
-                        return "42"
-                    }).then((value) => {
-                        value.should.be.equal("42");
-                        done();
-                    })
-                })
-                .bootstrap()
-            ;
-        });
-
-    });
-
-    describe("instantiateAsync", function () {
-        it("Services should be resolved", function (done) {
-            this.timeout(100);
-
-            class Service1 {
-                static get $inject() {
-                    return ["s1", "s2"];
-                }
-
-                constructor(s1, s2) {
-                    this.s1 = s1;
-                    this.s2 = s2;
-                }
-            }
-
-            radis.module("module", [])
-                .factory("s1", () => "s1")
-                .factory("s2", () => Promise.resolve("s2"))
-                .run(($injector) => {
-                    $injector.instantiateAsync(Service1).then((service) => {
-                        service.should.be.an.instanceof(Service1);
-                        service.s1.should.be.equal("s1");
-                        service.s2.should.be.equal("s2");
-                        done();
-                    });
-                })
-                .bootstrap()
-            ;
-        });
-    });
-
     describe("getService", function () {
 
         let module;
