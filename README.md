@@ -28,7 +28,7 @@ app.run(function (unicorn) {
 ```
 
 ## Requirement
-Radis use ES6 syntax internally so it require node >= 5.
+Radis use ES6 syntax internally so it require node >= 6.
 
 ## Documentation
 [Go to documentation](http://jerome-quere.github.io/radis/)
