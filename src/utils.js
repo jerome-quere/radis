@@ -4,7 +4,7 @@
  * The module name RegExp
  * @type {RegExp}
  */
-const moduleNameRegex = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+const moduleNameRegex = /^[a-zA-Z_][a-zA-Z0-9_-]*$/;
 
 /**
  * The service name RegExp

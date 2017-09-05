@@ -19,6 +19,7 @@ describe("Core", function () {
             chai.expect(() => radis.module("module", [])).to.not.throw();
             chai.expect(() => radis.module("mODu90le1", [])).to.not.throw();
             chai.expect(() => radis.module("_mODu90le1", [])).to.not.throw();
+            chai.expect(() => radis.module("_mODu9-0le1", [])).to.not.throw();
             chai.expect(() => radis.module("fs.ds", [])).to.throw();
             chai.expect(() => radis.module("1ds", [])).to.throw();
             chai.expect(() => radis.module("d:s", [])).to.throw();
