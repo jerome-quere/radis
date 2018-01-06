@@ -2,6 +2,8 @@
 
 import radis from '../src'
 
+/* tslint:disable:no-empty */
+
 describe('Injector', function() {
   it('the injector should be injected at runtine', () => {
     radis
