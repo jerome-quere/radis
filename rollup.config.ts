@@ -11,13 +11,13 @@ export default {
   input: `dist/es/${libraryName}.js`,
   output: [
     { file: pkg.main, name: camelCase(libraryName), format: 'umd' },
-    { file: pkg.module, format: 'es' },
+    { file: pkg.module, format: 'es' }
   ],
   sourcemap: true,
   // Indicate here external modules you don't wanna include in your bundle (i.e.: 'lodash')
   external: [],
   watch: {
-    include: 'dist/es/**',
+    include: 'dist/es/**'
   },
   plugins: [
     // Allow bundling cjs modules (unlike webpack, rollup doesn't understand cjs)
@@ -28,6 +28,6 @@ export default {
     resolve(),
 
     // Resolve source maps to the original source
-    sourceMaps(),
-  ],
+    sourceMaps()
+  ]
 }
