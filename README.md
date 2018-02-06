@@ -3,6 +3,7 @@
 </h1>
 
 [![Travis](https://travis-ci.org/jerome-quere/radis.svg)](https://travis-ci.org/jerome-quere/radis)
+[![Coverage Status](https://coveralls.io/repos/github/jerome-quere/radis/badge.svg?branch=master)](https://coveralls.io/github/jerome-quere/radis?branch=master)
 
 [![NPM](https://nodei.co/npm/radis.png)](https://npmjs.org/package/radis)
 
@@ -10,21 +11,42 @@
 
 ```js
 
-var radis = require('radis');
-var app   = radis.module('app', []);
+const radis = require('radis');
 
-class UnicornService {
-  do() {
-    console.log("Rainbow");
+
+class Unicorn {
+  constructor(name) {
+      this.name = name;
+  }
+  
+  poop() {
+    console.log(`${this.name} poop rainbow`);
   }
 }
 
-app.service('unicorn', UnicornService);
-app.run(function (unicorn) {
-  unicorn.do();
-});
+class UnicornProvider {
+    constructor($injector, name) {
+        this.name = name;
+    }
+    setName(name) {
+        this.name = name;
+    }
+    $get() {
+        return new Unicorn(name);
+    }
+}
 
-
+radis
+    .module('app', [])
+    .provider('alice', UnicornProvider)
+    .provider('anonymousUnicorn', UnicornProvider)
+    .config((anonymousUnicornProvider) => anonymousUnicornProvider.setName("paul"))
+    .run((alice, anonymousUnicorn) => {
+        alice.poop(); // alice poop rainbow
+        anonymousUnicorn.poop(); // paul poop rainbow
+    })
+    .bootstrap()
+;
 ```
 
 ## Requirement
