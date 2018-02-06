@@ -12,7 +12,7 @@
 
 ```js
 
-const radis = require('radis');
+const { radis } = require('radis');
 
 
 class Unicorn {
@@ -33,7 +33,7 @@ class UnicornProvider {
         this.name = name;
     }
     $get() {
-        return new Unicorn(name);
+        return new Unicorn(this.name);
     }
 }
 
