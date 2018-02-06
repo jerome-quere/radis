@@ -1,6 +1,6 @@
 'use strict'
 
-import radis from '../src'
+import { radis, Injector } from '../src'
 
 /* tslint:disable:no-empty */
 
@@ -9,7 +9,7 @@ describe('Injector', function() {
     radis
       .module('module', [])
       .run($injector => {
-        expect($injector).toBeInstanceOf(radis.Injector)
+        expect($injector).toBeInstanceOf(Injector)
       })
       .bootstrap()
   })
@@ -18,7 +18,7 @@ describe('Injector', function() {
     radis
       .module('module', [])
       .config($injector => {
-        expect($injector).toBeInstanceOf(radis.Injector)
+        expect($injector).toBeInstanceOf(Injector)
       })
       .bootstrap()
   })
@@ -124,7 +124,7 @@ describe('Injector', function() {
   })
 
   describe('#invoke', () => {
-    let $injector: radis.Injector
+    let $injector: Injector
 
     class Service3 {
       private a: number
@@ -224,94 +224,99 @@ describe('Injector', function() {
         .instantiate(Service)
     })
   })
-  //
-  // describe("#lift", function () {
-  //     let module;
-  //     let $injector;
-  //
-  //     class Service3 {
-  //         constructor() { this.a = 42; }
-  //         // noinspection JSUnusedGlobalSymbols
-  //         getValue() { return this.a; }
-  //         // noinspection JSUnusedGlobalSymbols
-  //         addLocale(local1) { return this.a + local1; }
-  //         // noinspection JSUnusedGlobalSymbols
-  //         addService(s1) { return this.a + s1; }
-  //     }
-  //
-  //     beforeEach(function () {
-  //         module = radis.module("module", [])
-  //             .factory("s1", () => "s1")
-  //             .factory("s2", () => "s2")
-  //             .service("s3", Service3)
-  //             .run(["$injector", (s) => $injector = s])
-  //             .bootstrap();
-  //     });
-  //
-  //     it("Should return a function", function () {
-  //         $injector.lift(() => null).should.be.an.instanceof(Function);
-  //     });
-  //
-  //     it("Should inject all the services", function () {
-  //         let injectable = (s1, s2) => {
-  //             s1.should.be.equal("s1");
-  //             s2.should.be.equal("s2");
-  //         };
-  //         $injector.lift(injectable)();
-  //     });
-  //
-  //     it("Should lift an injectable array", function () {
-  //         $injector.lift(["s1", (test) => test.should.be.equal("s1")])();
-  //     });
-  //
-  //     it("Should inject all the services, params and locale", function () {
-  //         let injectable = (s1, param1, s2, param2, local1, local2) => {
-  //             s1.should.be.equal("s1");
-  //             s2.should.be.equal("s2");
-  //             param1.should.be.equal("param1");
-  //             param2.should.be.equal("param2");
-  //             local1.should.be.equal("local1");
-  //             local2.should.be.equal("local2");
-  //         };
-  //         $injector.lift(injectable, ["param1", "param2"], {local1: "local1", local2: "local2"})("param1", "param2");
-  //     });
-  //
-  //     it("Should bind to correct self", function () {
-  //         let self = { a: 42 };
-  //         let injectable = function (s1, s2) {
-  //             s1.should.be.equal("s1");
-  //             s2.should.be.equal("s2");
-  //             this.a.should.be.equal(42);
-  //         };
-  //         $injector.lift(injectable, self)();
-  //     });
-  //
-  //     it("Should bind to correct self with params and locals", function () {
-  //         let self = { a: 42 };
-  //         let injectable = function (s1, param1, s2, param2, local1, local2) {
-  //             s1.should.be.equal("s1");
-  //             s2.should.be.equal("s2");
-  //             param1.should.be.equal("param1");
-  //             param2.should.be.equal("param2");
-  //             local1.should.be.equal("local1");
-  //             local2.should.be.equal("local2");
-  //             this.a.should.be.equal(42);
-  //         };
-  //         $injector.lift(injectable, self, ["param1", "param2"], {local1: "local1", local2: "local2"})("param1", "param2");
-  //     });
-  //
-  //     it("Should invoke service method", function () {
-  //         $injector.lift("s3:getValue")().should.be.equal(42);
-  //         $injector.lift("s3:addLocale", null, [], {local1: 5})().should.be.equal(47);
-  //         $injector.lift("s3:addLocale", null, ["local1"])(10).should.be.equal(52);
-  //         $injector.lift("s3:addService")().should.be.equal("42s1");
-  //         chai.expect(() => $injector.lift("s1:getValue")()).to.throw(Error);
-  //     });
-  //
-  //     it("Should cache correctly", function () {
-  //         let fn = $injector.lift("s3:getValue");
-  //         fn().should.be.equal(42);
-  //         fn().should.be.equal(42);
-  //     });
-  // });
+
+  describe('#lift', () => {
+    let $injector: Injector
+
+    class Service3 {
+      constructor(public a: string = 's3') {}
+      getValue() {
+        return this.a
+      }
+      addLocale(local1: string) {
+        return this.a + local1
+      }
+      addService(s1: string) {
+        return this.a + s1
+      }
+    }
+
+    beforeEach(() => {
+      $injector = radis
+        .module('module', [])
+        .factory('s1', () => 's1')
+        .factory('s2', () => 's2')
+        .service('s3', Service3)
+        .bootstrap()
+    })
+
+    it('Should inject all the services', () => {
+      const mock = jest.fn()
+      let injectable = (s1, s2) => mock.call(null, s1, s2)
+      $injector.lift(injectable)()
+      expect(mock.mock.calls[0][0]).toBe('s1')
+      expect(mock.mock.calls[0][1]).toBe('s2')
+    })
+
+    it('Should return result', () => {
+      const mock = jest.fn().mockReturnValue(42)
+      let injectable = (s1, s2) => mock.call(null, s1, s2)
+      expect($injector.lift(injectable)()).toBe(42)
+    })
+
+    it('Should lift an injectable array', () => {
+      const mock = jest.fn()
+      $injector.lift(['s1', 's2', mock])()
+      expect(mock.mock.calls[0][0]).toBe('s1')
+      expect(mock.mock.calls[0][1]).toBe('s2')
+    })
+
+    it('Should inject all the services, params and locale', () => {
+      const mock = jest.fn()
+      const params = ['s1', 'param1', 's2', 'param2', 'local1', 'local2']
+      let injectable = [...params, mock]
+      $injector.lift(injectable, null, ['param1', 'param2'], { local1: 'local1', local2: 'local2' })('param1', 'param2')
+      expect(mock.mock.calls[0]).toEqual(expect.arrayContaining(params))
+    })
+
+    it('Should bind to $injector by default', function() {
+      const injectable = jest.fn().mockReturnThis()
+      const lifted = $injector.lift(injectable)
+      expect(lifted()).toBe($injector)
+    })
+
+    it('Should bind to correct self', function() {
+      const self = { a: 42 }
+      const injectable = jest.fn().mockReturnThis()
+      const lifted = $injector.lift(injectable, self)
+      expect(lifted()).toBe(self)
+    })
+
+    it('Should bind to correct self with params and locals', function() {
+      const self = { a: 42 }
+      const mock = jest.fn().mockReturnThis()
+      const params = ['s1', 'param1', 's2', 'param2', 'local1', 'local2']
+      const injectable = [...params, mock]
+      const lifted = $injector.lift(injectable, self, ['param1', 'param2'], { local1: 'local1', local2: 'local2' })
+      expect(lifted('param1', 'param2')).toBe(self)
+      expect(mock.mock.calls[0]).toEqual(expect.arrayContaining(params))
+    })
+
+    it('Should lift service method', () => {
+      expect($injector.lift('s3:getValue')()).toBe('s3')
+      expect($injector.lift('s3:addLocale', null, [], { local1: 'local1' })()).toBe('s3local1')
+      expect($injector.lift('s3:addLocale', null, ['local1'])('local1')).toBe('s3local1')
+      expect($injector.lift('s3:addService')()).toBe('s3s1')
+    })
+
+    it('Should throw if service method does not exist', () => {
+      expect($injector.lift('s1:getValue')).toThrow(Error)
+    })
+
+    it('Should cache correctly', () => {
+      let fn = $injector.lift('s3:getValue')
+      expect(fn()).toBe('s3')
+      expect(fn()).toBe('s3')
+    })
+  })
 })

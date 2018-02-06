@@ -13,6 +13,7 @@
         "noEmitHelpers": true,
         "importHelpers": true,
         "typeRoots": [
+          "typings",
           "node_modules/@types"
         ]
     },

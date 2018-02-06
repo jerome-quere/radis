@@ -1,7 +1,5 @@
-'use strict'
-
 import functionArguments from 'function-arguments'
-import { Injectable, InjectableArray, InjectableClass, InjectableFunction, isArray, isFunction, isInjectable, Service, isString } from './utils'
+import { Injectable, InjectableArray, InjectableClass, InjectableFunction, isArray, isFunction, isInjectable, Service } from './utils'
 
 export interface Provider {
   $get(...args: any[]): any
@@ -17,9 +15,11 @@ interface ServiceBag {
   service?: Service
 }
 
+export type InjectorLocals = { [name: string]: any }
+
 class ResolvedInjectable {
   constructor(public func: InjectableFunction, public self: any, public services: string[]) {}
-  invoke(injector: Injector, locals: any): any {
+  invoke(injector: Injector, locals: InjectorLocals): any {
     let services = this.services.map(serviceName => injector.getService(serviceName, locals))
     return this.func.apply(this.self, services)
   }
@@ -74,53 +74,24 @@ export class Injector {
    * @param locals Additional variables that will be injected
    * @return {Function} The lifted function
    */
-  // lift(injectable: Injectable, self: any = null, paramNames: string[] = [], locals = {}) {
-  //   // Re-arrange parameters if no self is provided
-  //   if (isArray(self)) {
-  //     locals = paramNames
-  //     paramNames = self
-  //     self = null
-  //   }
-  //
-  //   let cache = null
-  //   let that = this
-  //   return function() {
-  //     // Merge locals and positional params
-  //     let _locals = Object.assign({}, locals)
-  //     let args = arguments
-  //     paramNames.forEach((name, index) => {
-  //       _locals[name] = args[index]
-  //     })
-  //
-  //     // If injection was already resolve use cached version.
-  //     if (cache) {
-  //       return cache(_locals)
-  //     }
-  //
-  //     // Handle serviceMethod injectable
-  //     if (isString(injectable) && utils.serviceMethodNameRegex.test(injectable)) {
-  //       let _tmp = injectable.split(':')
-  //       if (self === null || self === undefined) self = that._getService(_tmp[0], _locals)
-  //
-  //       if (!utils.isFunction(self[_tmp[1]]))
-  //         throw new Error(`Invalid serviceMethod injectable ${injectable}. No method ${_tmp[1]} found in service ${_tmp[0]}`)
-  //       injectable = self[_tmp[1]]
-  //     }
-  //
-  //     if (self === undefined || self === null) self = this
-  //
-  //     if (utils.isFunction(injectable)) injectable = Injector._buildInjectArray(injectable)
-  //
-  //     let func = injectable.pop()
-  //
-  //     cache = locals => {
-  //       let services = injectable.map(serviceName => that._getService(serviceName, locals))
-  //       return func.apply(self, services)
-  //     }
-  //
-  //     return cache(_locals)
-  //   }
-  // }
+  lift(injectable: Injectable, self: any = null, paramNames: string[] = [], locals: InjectorLocals = {}) {
+    let cache: ResolvedInjectable
+    return (...args: any[]) => {
+      // Merge locals and positional params
+      let _locals: InjectorLocals = Object.assign({}, locals)
+      paramNames.forEach((name, index) => {
+        _locals[name] = args[index]
+      })
+
+      // If injection was already resolve use cached version.
+      if (cache) {
+        return cache.invoke(this, _locals)
+      }
+
+      cache = this._resolveInjectable(injectable, self)
+      return cache.invoke(this, _locals)
+    }
+  }
 
   /**
    * @param serviceName The name of the service

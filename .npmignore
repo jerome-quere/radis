@@ -1,1 +1,12 @@
-# Created by .ignore support plugin (hsz.mobi)
+/dist
+/node_modules
+/test
+/tools
+/.editorconfig
+/.gitignore
+/.travis.yml
+/rollup.config.ts
+/test.tsconfig.json
+/tsconfig.json
+/tslint.json
+/yarn.lock

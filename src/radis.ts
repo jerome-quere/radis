@@ -1,6 +1,5 @@
 import * as utils from './utils'
 import { Module } from './Module'
-import { Injector } from './Injector'
 
 export const radis = {
   module: (moduleName: string, dependencies: Module[] = []): Module => {
@@ -9,8 +8,5 @@ export const radis = {
     }
 
     return new Module(moduleName, dependencies)
-  },
-
-  Module,
-  Injector
+  }
 }

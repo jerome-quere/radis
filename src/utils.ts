@@ -1,5 +1,3 @@
-'use strict'
-
 /**
  * The module name RegExp
  */
