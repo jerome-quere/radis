@@ -9,6 +9,8 @@
 
 ## Quickstart
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/jerome-quere/radis.svg)](https://greenkeeper.io/)
+
 ```js
 
 const radis = require('radis');
