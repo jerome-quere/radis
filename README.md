@@ -4,6 +4,7 @@
 
 [![Travis](https://travis-ci.org/jerome-quere/radis.svg)](https://travis-ci.org/jerome-quere/radis)
 [![Coverage Status](https://coveralls.io/repos/github/jerome-quere/radis/badge.svg?branch=master)](https://coveralls.io/github/jerome-quere/radis?branch=master)
+[![Greenkeeper badge](https://badges.greenkeeper.io/jerome-quere/radis.svg)](https://greenkeeper.io/)
 
 [![NPM](https://nodei.co/npm/radis.png)](https://npmjs.org/package/radis)
 
