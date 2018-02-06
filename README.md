@@ -1,6 +1,4 @@
-<h1>
-  <a href="https://github.com/jerome-quere/radis"><img alt="Radis logo" src="http://jerome-quere.github.io/radis/images/logo.png"/></a>
-</h1>
+<h1><a href="https://github.com/jerome-quere/radis"><img alt="Radis logo" src="http://jerome-quere.github.io/radis/images/logo.png" /></a></h1>
 
 [![Travis](https://travis-ci.org/jerome-quere/radis.svg)](https://travis-ci.org/jerome-quere/radis)
 [![Coverage Status](https://coveralls.io/repos/github/jerome-quere/radis/badge.svg?branch=master)](https://coveralls.io/github/jerome-quere/radis?branch=master)
