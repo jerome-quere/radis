@@ -1,7 +1,7 @@
 {
   "name": "radis",
   "version": "0.0.0-development",
-  "description": "",
+  "description": "A Javascript dependency injection base on Angular.js API.",
   "keywords": [],
   "main": "dist/radis.umd.js",
   "module": "dist/radis.es5.js",

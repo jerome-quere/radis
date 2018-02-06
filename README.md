@@ -1,5 +1,3 @@
-# Radis
-
 <h1>
   <a href="https://github.com/jerome-quere/radis"><img alt="Radis logo" src="http://jerome-quere.github.io/radis/images/logo.png"/></a>
 </h1>
