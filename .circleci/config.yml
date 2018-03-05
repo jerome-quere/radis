@@ -1,5 +1,11 @@
 version: 2
 jobs:
+  greenkeeper-lockfile:
+    docker:
+      - image: circleci/node:9
+    steps:
+      - checkout
+      - run: echo "test"
   test-node-6:
     docker:
       - image: circleci/node:6
@@ -48,6 +54,7 @@ workflows:
   version: 2
   build:
     jobs:
+      - greenkeeper-lockfile
       - test-node-6
       - test-node-8
       - test-node-9
