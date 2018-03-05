@@ -1,5 +1,12 @@
 version: 2
 jobs:
+  greenkeeper-lockfile:
+    docker:
+        - image: circleci/node:9
+      steps:
+        - checkout
+        - run: npx -p greenkeeper-lockfile greenkeeper-lockfile-update
+        - run: npx -p greenkeeper-lockfile greenkeeper-lockfile-upload
   test-node-6:
     docker:
       - image: circleci/node:6
@@ -13,7 +20,7 @@ jobs:
           paths:
             - node_modules
           key: yarn-{{ .Environment.CIRCLE_JOB }}-{{ checksum "yarn.lock" }}
-      - run: yarn test
+      - run: yarn run test:prod
   test-node-8:
     docker:
       - image: circleci/node:8
@@ -27,7 +34,7 @@ jobs:
           paths:
             - node_modules
           key: yarn-{{ .Environment.CIRCLE_JOB }}-{{ checksum "yarn.lock" }}
-      - run: yarn test
+      - run: yarn run test:prod
   test-node-9:
     docker:
       - image: circleci/node:9
@@ -41,13 +48,24 @@ jobs:
           paths:
             - node_modules
           key: yarn-{{ .Environment.CIRCLE_JOB }}-{{ checksum "yarn.lock" }}
-      - run: yarn test
-
+      - run: yarn run test:prod
+      - run: yarn run report-coverage
 
 workflows:
   version: 2
   build:
     jobs:
-      - test-node-6
-      - test-node-8
-      - test-node-9
+      - greenkeeper-lockfile:
+          filters:
+            branches:
+              only:
+                - /greenkeeper\/.*/
+      - test-node-6:
+        - requires:
+          - greenkeeper-lockfile
+      - test-node-8:
+        - requires:
+          - greenkeeper-lockfile
+      - test-node-9:
+        - requires:
+          - greenkeeper-lockfile
