@@ -54,7 +54,11 @@ workflows:
   version: 2
   build:
     jobs:
-      - greenkeeper-lockfile
+      - greenkeeper-lockfile:
+          filters:
+            branches:
+              only:
+                - /greenkeeper\/.*/
       - test-node-6:
           requires:
             - greenkeeper-lockfile
