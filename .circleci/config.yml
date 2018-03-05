@@ -55,6 +55,12 @@ workflows:
   build:
     jobs:
       - greenkeeper-lockfile
-      - test-node-6
-      - test-node-8
-      - test-node-9
+      - test-node-6:
+          requires:
+            - greenkeeper-lockfile
+      - test-node-8:
+          requires:
+             - greenkeeper-lockfile
+      - test-node-9:
+          requires:
+             - greenkeeper-lockfile
