@@ -12,7 +12,7 @@
   "author": "Jerome Quere <contact@jeromequere.com>",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jerome-quere/radis/"
+    "url": "https://github.com/jerome-quere/radis"
   },
   "license": "MIT",
   "engines": {
