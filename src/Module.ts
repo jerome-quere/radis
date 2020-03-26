@@ -124,7 +124,7 @@ export class Module {
    * Bootstrap the module
    * @return The module injector
    */
-  bootstrap(): Injector {
+  async bootstrap(): Promise<Injector> {
     const modules: Module[] = []
     const $injectors: Injector[] = []
 
@@ -134,14 +134,21 @@ export class Module {
     $injectors.push($injector)
 
     // TODO maybe throw if a service instance try to be injected in the config hook
-    modules.forEach((module, i) => {
-      module.configHooks.forEach(hook => $injectors[i].invoke(hook))
-    })
+    for (let i = 0; modules.length > i; i++) {
+      let module = modules[i]
+      for (let j = 0; module.configHooks.length > j; j++) {
+        let hook = module.configHooks[j]
+        await $injectors[i].invoke(hook)
+      }
+    }
 
-    modules.forEach((module, i) => {
-      module.runHooks.forEach(hook => $injectors[i].invoke(hook))
-    })
-
+    for (let i = 0; modules.length > i; i++) {
+      let module = modules[i]
+      for (let j = 0; module.runHooks.length > j; j++) {
+        let hook = module.runHooks[j]
+        await $injectors[i].invoke(hook)
+      }
+    }
     return $injector
   }
 
