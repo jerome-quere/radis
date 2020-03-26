@@ -1,8 +1,8 @@
 version: 2
 jobs:
-  test-node-6:
+  test-node-10:
     docker:
-      - image: circleci/node:6
+      - image: circleci/node:10
     steps:
       - checkout
       - restore_cache:
@@ -14,9 +14,9 @@ jobs:
             - node_modules
           key: yarn-{{ .Environment.CIRCLE_JOB }}-{{ checksum "yarn.lock" }}
       - run: yarn test
-  test-node-8:
+  test-node-11:
     docker:
-      - image: circleci/node:8
+      - image: circleci/node:11
     steps:
       - checkout
       - restore_cache:
@@ -28,9 +28,9 @@ jobs:
             - node_modules
           key: yarn-{{ .Environment.CIRCLE_JOB }}-{{ checksum "yarn.lock" }}
       - run: yarn test
-  test-node-9:
+  test-node-12:
     docker:
-      - image: circleci/node:9
+      - image: circleci/node:12
     steps:
       - checkout
       - restore_cache:
@@ -44,7 +44,7 @@ jobs:
       - run: yarn test
   deploy:
     docker:
-      - image: circleci/node:9
+      - image: circleci/node:12
     steps:
       - checkout
       - restore_cache:
@@ -62,14 +62,14 @@ workflows:
   version: 2
   build:
     jobs:
-      - test-node-6:
-      - test-node-8:
-      - test-node-9:
+      - test-node-10: {}
+      - test-node-11: {}
+      - test-node-12: {}
       - deploy:
           requires:
-            - test-node-6
-            - test-node-8
-            - test-node-9
+            - test-node-10
+            - test-node-11
+            - test-node-12
           filters:
             branches:
               only: master
