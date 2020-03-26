@@ -5,8 +5,8 @@ import { radis, Injector } from '../src'
 /* tslint:disable:no-empty */
 
 describe('Injector', function() {
-  it('the injector should be injected at runtine', () => {
-    radis
+  it('the injector should be injected at runtine', async () => {
+    await radis
       .module('module', [])
       .run($injector => {
         expect($injector).toBeInstanceOf(Injector)
@@ -14,8 +14,8 @@ describe('Injector', function() {
       .bootstrap()
   })
 
-  it('the injector should be injected at config time', () => {
-    radis
+  it('the injector should be injected at config time', async () => {
+    await radis
       .module('module', [])
       .config($injector => {
         expect($injector).toBeInstanceOf(Injector)
@@ -23,8 +23,8 @@ describe('Injector', function() {
       .bootstrap()
   })
 
-  it('The injector should parse all kind of function declaration', () => {
-    radis
+  it('The injector should parse all kind of function declaration', async () => {
+    await radis
       .module('module', [])
       .factory('s1', () => 's1')
       .factory('s2', () => 's2')
@@ -52,23 +52,23 @@ describe('Injector', function() {
       .bootstrap()
   })
 
-  it('Should throw on invalid function', () => {
+  it('Should throw on invalid function', async () => {
     const test: any = function(a) {}
     const _toString = Function.prototype.toString
     Function.prototype.toString = () => 'a =\\> =\\> function (){}'
-    expect(() => {
+    await expect(
       radis
         .module('module', [])
         .run(test)
         .bootstrap()
-    }).toThrow()
+    ).rejects.toThrow(Error)
     Function.prototype.toString = _toString
   })
 
-  it('Should work with no parentesis arrow function', () => {
+  it('Should work with no parentesis arrow function', async () => {
     const test: any = function(s1) {}
     const _toString = Function.prototype.toString
-    const $injector = radis
+    const $injector = await radis
       .module('module', [])
       .factory('s1', () => 's1')
       .run(s1 => {})
@@ -90,8 +90,8 @@ describe('Injector', function() {
         .factory('s2', () => 's2')
     })
 
-    it('Should return the right service', () => {
-      module
+    it('Should return the right service', async () => {
+      await module
         .run($injector => {
           expect($injector.getService('s1')).toBe('s1')
           expect($injector.getService('s2')).toBe('s2')
@@ -99,23 +99,23 @@ describe('Injector', function() {
         .bootstrap()
     })
 
-    it('Should throw if service does not exist', () => {
-      module
+    it('Should throw if service does not exist', async () => {
+      await module
         .run($injector => {
           expect(() => $injector.getService('s3')).toThrow(Error)
         })
         .bootstrap()
     })
 
-    it('Should get provider', () => {
-      module
+    it('Should get provider', async () => {
+      await module
         .run($injector => {
           expect($injector.getService('s1Provider')).toBeTruthy()
         })
         .bootstrap()
     })
-    it('Should throw when provider do not exist', () => {
-      module
+    it('Should throw when provider do not exist', async () => {
+      await module
         .run($injector => {
           expect(() => $injector.getService('s3Provider')).toThrow()
         })
@@ -142,8 +142,8 @@ describe('Injector', function() {
       }
     }
 
-    beforeEach(() => {
-      $injector = radis
+    beforeEach(async () => {
+      $injector = await radis
         .module('module', [])
         .factory('s1', () => 10)
         .factory('s2', () => 20)
@@ -207,7 +207,7 @@ describe('Injector', function() {
   })
 
   describe('#instantiate', () => {
-    it('Should inject services', () => {
+    it('Should inject services', async () => {
       class Service {
         static get $inject() {
           return ['s1']
@@ -217,11 +217,12 @@ describe('Injector', function() {
         }
       }
 
-      radis
+      const $injector = await radis
         .module('module')
         .factory('s1', () => 's1')
         .bootstrap()
-        .instantiate(Service)
+
+      $injector.instantiate(Service)
     })
   })
 
@@ -241,8 +242,8 @@ describe('Injector', function() {
       }
     }
 
-    beforeEach(() => {
-      $injector = radis
+    beforeEach(async () => {
+      $injector = await radis
         .module('module', [])
         .factory('s1', () => 's1')
         .factory('s2', () => 's2')

@@ -2,7 +2,7 @@ import radis from '../src'
 
 describe('ModuleDependencies', () => {
   describe('Simple dependency', () => {
-    it('should get the dependency service', () => {
+    it('should get the dependency service', async () => {
       const m1 = radis.module('m1', []).factory('s1', () => 's1')
       const m2 = radis.module('m2', [m1]).factory('s2', () => 's2')
       const m3 = radis.module('m3', [m2]).factory('s3', () => 's3')
@@ -18,10 +18,10 @@ describe('ModuleDependencies', () => {
         expect(s3).toBe('s3')
       })
 
-      m3.bootstrap()
+      await m3.bootstrap()
     })
 
-    it('should override the child dependency', () => {
+    it('should override the child dependency', async () => {
       const m1 = radis.module('m1', []).factory('service', () => 's1')
       const m2 = radis.module('m2', [m1]).factory('service', () => 's2')
       const m3 = radis.module('m3', [m2, m1]).factory('service', () => 's3')
@@ -30,19 +30,19 @@ describe('ModuleDependencies', () => {
       m2.run(service => expect(service).toBe('s2'))
       m3.run(service => expect(service).toBe('s3'))
 
-      m3.bootstrap()
+      await m3.bootstrap()
     })
 
-    it('should get the closest child dependency', () => {
+    it('should get the closest child dependency', async () => {
       const m1 = radis.module('m1', []).factory('service', () => 's1')
       const m2 = radis.module('m2', [m1]).factory('service', () => 's2')
       const m3 = radis.module('m3', [m2])
 
       m3.run(service => expect(service).toBe('s2'))
-      m3.bootstrap()
+      await m3.bootstrap()
     })
 
-    it('should call dependency first', () => {
+    it('should call dependency first', async () => {
       const m1 = radis.module('m1', []).factory('s1', () => 's1')
       const m2 = radis.module('m2', [m1]).factory('s2', () => 's2')
 
@@ -54,10 +54,10 @@ describe('ModuleDependencies', () => {
       m2.config(s2Provider => expect(count++).toBe(1))
       m2.run(s2 => expect(count++).toBe(3))
 
-      m2.bootstrap()
+      await m2.bootstrap()
     })
 
-    it('should get a shared instance', () => {
+    it('should get a shared instance', async () => {
       const m1 = radis.module('m1').factory('s', () => ({ v: 0 }))
       const m2 = radis.module('m2', [m1])
       const m3 = radis.module('m2', [m1])
@@ -68,10 +68,10 @@ describe('ModuleDependencies', () => {
       m3.run(s => expect(s.v++).toBe(2))
       m4.run(s => expect(s.v++).toBe(3))
 
-      m4.bootstrap()
+      await m4.bootstrap()
     })
 
-    it('should be call in the right order', () => {
+    it('should be call in the right order', async () => {
       let count = 0
 
       const m1 = radis.module('m1').factory('s', () => {
@@ -92,7 +92,7 @@ describe('ModuleDependencies', () => {
       m3.run(s => expect(count++).toBe(7))
       m4.run(s => expect(count++).toBe(8))
 
-      m4.bootstrap()
+      await m4.bootstrap()
     })
   })
 })

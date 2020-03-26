@@ -140,12 +140,15 @@ export class Module {
         let hook = module.configHooks[j]
         await $injectors[i].invoke(hook)
       }
+    }
+
+    for (let i = 0; modules.length > i; i++) {
+      let module = modules[i]
       for (let j = 0; module.runHooks.length > j; j++) {
         let hook = module.runHooks[j]
         await $injectors[i].invoke(hook)
       }
     }
-
     return $injector
   }
 

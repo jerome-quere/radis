@@ -4,15 +4,15 @@ import radis from '../src'
 
 describe('Module', () => {
   describe('#bootstrap()', () => {
-    it('should be called', () => {
+    it('should be called', async () => {
       let module = radis.module('module', [])
-      module.bootstrap()
+      await module.bootstrap()
     })
   })
 
   //
   describe('#service()', function() {
-    it('should be injected', function() {
+    it('should be injected', async function() {
       class Service1 {}
       class Service2 {}
       class Service3 {}
@@ -27,9 +27,9 @@ describe('Module', () => {
           expect(s2).toBeInstanceOf(Service2)
           expect(s3).toBeInstanceOf(Service3)
         })
-      module.bootstrap()
+      await module.bootstrap()
     })
-    it('should be injected with $name', function() {
+    it('should be injected with $name', async function() {
       class Service1 {
         static get $inject() {
           return ['$name']
@@ -37,7 +37,7 @@ describe('Module', () => {
         constructor(public $name: string) {}
       }
 
-      radis
+      await radis
         .module('module', [])
         .service('s1', Service1)
         .run(s1 => {
@@ -59,14 +59,14 @@ describe('Module', () => {
   })
 
   describe('#factory()', function() {
-    it('should be injected', function() {
+    it('should be injected', async function() {
       let module = radis.module('module', [])
 
       class Service1 {}
       class Service2 {}
       class Service3 {}
 
-      module
+      await module
         .factory('service1', () => new Service1())
         .factory('service2', () => new Service2())
         .factory('service3', () => new Service3())
@@ -77,8 +77,8 @@ describe('Module', () => {
         })
         .bootstrap()
     })
-    it('should be injected with $name', function() {
-      radis
+    it('should be injected with $name', async function() {
+      await radis
         .module('module', [])
         .factory('s1', $name => $name)
         .run(s1 => {
@@ -86,12 +86,12 @@ describe('Module', () => {
         })
         .bootstrap()
     })
-    it('should throw when nothing is return', () => {
+    it('should throw when nothing is return', async () => {
       const module = radis
         .module('module', [])
         .factory('s1', function() {})
         .run(s1 => {})
-      expect(() => module.bootstrap()).toThrow(Error)
+      await expect(module.bootstrap()).rejects.toThrow(Error)
     })
     it('should check params', function() {
       expect(() => radis.module('module', []).factory('s1', [function() {}] as any)).not.toThrow(Error)
@@ -107,7 +107,7 @@ describe('Module', () => {
   })
 
   describe('#provider()', function() {
-    it('should be injected', function() {
+    it('should be injected', async function() {
       let module = radis.module('module', [])
 
       class Service1Provider {
@@ -126,7 +126,7 @@ describe('Module', () => {
         }
       }
 
-      module
+      await module
         .provider('service1', Service1Provider)
         .provider('service2', Service2Provider)
         .provider('service3', Service3Provider)
@@ -137,7 +137,7 @@ describe('Module', () => {
         })
         .bootstrap()
     })
-    it('should receive the $injector as first constructor parameter', function() {
+    it('should receive the $injector as first constructor parameter', async function() {
       class Service1Provider {
         constructor(public $injector: radis.Injector) {}
         $get() {
@@ -145,13 +145,13 @@ describe('Module', () => {
         }
       }
 
-      radis
+      await radis
         .module('module', [])
         .provider('s1', Service1Provider)
         .run(($injector: any, s1: any) => expect(s1).toBe($injector))
         .bootstrap()
     })
-    it('should receive $name as second constructor parameter', function() {
+    it('should receive $name as second constructor parameter', async function() {
       class Service1Provider {
         constructor(public $injector: radis.Injector, public $name: string) {}
         $get() {
@@ -159,20 +159,20 @@ describe('Module', () => {
         }
       }
 
-      radis
+      await radis
         .module('module', [])
         .provider('s1', Service1Provider)
         .run((s1: any) => expect(s1).toBe('s1'))
         .bootstrap()
     })
-    it('$get should receive $name as parameter', function() {
+    it('$get should receive $name as parameter', async function() {
       class Service1Provider {
         $get($name: string) {
           return $name
         }
       }
 
-      radis
+      await radis
         .module('module', [])
         .provider('s1', Service1Provider)
         .run(s1 => expect(s1).toBe('s1'))
@@ -192,7 +192,7 @@ describe('Module', () => {
   })
 
   describe('#config()', function() {
-    it('should call config with the provider', function() {
+    it('should call config with the provider', async function() {
       class Service1Provider {
         private string: string
         setString(s: string) {
@@ -204,7 +204,7 @@ describe('Module', () => {
         }
       }
 
-      radis
+      await radis
         .module('module', [])
         .provider('service1', Service1Provider)
         .config(function(service1Provider) {
